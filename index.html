@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fabrice - Modern .NET CRUD Generator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Animation library -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <style>
+    /* Custom animations */
+    .slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Smooth transitions */
+    .transition-all {
+      transition: all 0.3s ease;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Code preview styling */
+    .code-preview {
+      font-family: 'Fira Code', monospace;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+
+  <!-- Header with modern gradient -->
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg p-6">
+    <div class="container mx-auto">
+      <h1 class="text-3xl font-bold animate__animated animate__fadeIn">Fabrice</h1>
+      <p class="text-blue-100 mt-2 animate__animated animate__fadeIn animate__delay-1s">Modern .NET 8 CRUD Generator</p>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container mx-auto flex flex-1 p-6 gap-6 flex-wrap">
+    
+    <!-- Left Panel: Form Configuration -->
+    <section class="w-full lg:w-1/3 space-y-6">
+      <!-- Configuration Card -->
+      <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 space-y-6 animate__animated animate__fadeInLeft">
+        <h2 class="text-xl font-semibold border-b pb-2 dark:border-slate-700">Configuration</h2>
+
+      <!-- Pattern Selection -->
+        <div class="space-y-2">
+          <label for="patternSelect" class="block font-medium text-sm">Architecture Pattern</label>
+          <select id="patternSelect" class="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-all">
+          <option value="cqrs">CQRS Pattern</option>
+          <option value="service">Service/Repository Pattern</option>
+          <option value="simple">Simple Controller Pattern</option>
+        </select>
+      </div>
+
+      <!-- HTTP Method Selection -->
+        <div class="space-y-2">
+          <label for="httpMethodSelect" class="block font-medium text-sm">HTTP Method</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button class="px-4 py-2 rounded-lg bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 transition-all method-btn active" data-method="GET">GET</button>
+            <button class="px-4 py-2 rounded-lg bg-green-50 dark:bg-slate-700 hover:bg-green-100 dark:hover:bg-slate-600 transition-all method-btn" data-method="POST">POST</button>
+            <button class="px-4 py-2 rounded-lg bg-yellow-50 dark:bg-slate-700 hover:bg-yellow-100 dark:hover:bg-slate-600 transition-all method-btn" data-method="PUT">PUT</button>
+            <button class="px-4 py-2 rounded-lg bg-red-50 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-slate-600 transition-all method-btn" data-method="DELETE">DELETE</button>
+          </div>
+          <select id="httpMethodSelect" class="hidden">
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="PUT">PUT</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+      </div>
+
+      <!-- Entity Name Input -->
+        <div class="space-y-2">
+          <label for="entityNameInput" class="block font-medium text-sm">Entity Name</label>
+        <input 
+          id="entityNameInput" 
+          type="text" 
+            class="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-all"
+          placeholder="e.g. Product" 
+        />
+      </div>
+
+        <!-- Direct DTO Code Input -->
+        <div class="space-y-2">
+          <label for="dtoPasteInput" class="block font-medium text-sm">Paste DTO Code</label>
+          <div class="relative">
+            <textarea 
+              id="dtoPasteInput" 
+              class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-all font-mono text-sm h-32"
+              placeholder="public class ProductDto {
+    public int Id { get; set; }
+    public string Name { get; set; }
+}"
+            ></textarea>
+            <button 
+              id="parseDtoBtn" 
+              class="absolute bottom-3 right-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+            >
+              Parse DTO
+            </button>
+          </div>
+          <span id="dtoValidationMessage" class="text-sm"></span>
+        </div>
+
+        <!-- DTO Fields -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="block font-medium text-sm">DTO Fields</label>
+        <button 
+          id="addFieldBtn" 
+              class="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
+        >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Field
+        </button>
+          </div>
+          <div id="dtoFieldsContainer" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+            <!-- Dynamic fields will be inserted here -->
+          </div>
+      </div>
+
+      <!-- Namespace Input -->
+        <div class="space-y-2">
+          <label for="namespaceInput" class="block font-medium text-sm">Namespace</label>
+        <input 
+          id="namespaceInput" 
+          type="text" 
+            class="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-all"
+          placeholder="e.g. MyApp.Core"
+        />
+      </div>
+
+        <!-- Dependencies Input -->
+        <div class="space-y-2">
+          <label for="dependenciesInput" class="block font-medium text-sm">Dependencies</label>
+          <textarea 
+            id="dependenciesInput" 
+            class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-all font-mono text-sm h-32"
+            placeholder="ILogger<ProductController> logger
+IConfiguration config"
+          ></textarea>
+          <p class="text-xs text-slate-500 dark:text-slate-400">One dependency per line: Type name</p>
+      </div>
+
+        <!-- Endpoint Explorer -->
+        <div class="space-y-4">
+          <h3 class="font-medium text-sm border-b pb-2 dark:border-slate-700">Endpoint Explorer</h3>
+          <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+            <div id="endpointList" class="space-y-3">
+              <!-- Example Endpoint (will be dynamically generated) -->
+              <div class="endpoint-item animate__animated animate__fadeIn">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="px-2 py-1 text-xs rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">GET</span>
+                  <span class="font-mono text-sm">/api/products</span>
+                </div>
+                <div class="pl-4 border-l-2 border-slate-200 dark:border-slate-700 space-y-1">
+                  <div class="text-xs text-slate-500 dark:text-slate-400">Returns: <span class="font-mono">List&lt;ProductDto&gt;</span></div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">Auth Required: <span class="text-green-600 dark:text-green-400">Yes</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="space-y-3">
+          <label class="block font-medium text-sm mb-2">Options</label>
+          <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-2 rounded-lg transition-all">
+            <input type="checkbox" id="useAuthorization" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
+            <span class="select-none">Add [Authorize] attribute</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-2 rounded-lg transition-all">
+            <input type="checkbox" id="useValidation" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
+            <span class="select-none">Add validation attributes</span>
+          </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-3 pt-4 border-t dark:border-slate-700">
+        <button 
+          id="generateCodeBtn" 
+            class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 font-medium"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          Generate Code
+        </button>
+
+          <div class="flex gap-3">
+        <button 
+          id="saveConfigBtn" 
+              class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-all text-sm font-medium"
+        >
+              Save Config
+        </button>
+        <button 
+          id="loadConfigBtn" 
+              class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-all text-sm font-medium"
+        >
+              Load Config
+        </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AutoMapper Configuration Panel -->
+    <section class="w-full lg:w-2/3 space-y-6">
+      <!-- AutoMapper Card -->
+      <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 animate__animated animate__fadeInRight">
+        <div class="flex items-center justify-between border-b pb-4 mb-6 dark:border-slate-700">
+          <h2 class="text-xl font-semibold flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            AutoMapper Configuration
+          </h2>
+          <div class="flex items-center gap-2">
+            <button 
+              id="clearMapperBtn"
+              class="px-3 py-1 text-sm bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Clear
+            </button>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-6">
+        <!-- Source (Entity) Code -->
+          <div class="space-y-2">
+            <label for="sourceCode" class="block font-medium text-sm">Source (Entity) Code</label>
+            <div class="relative">
+          <textarea 
+            id="sourceCode" 
+                class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-all font-mono text-sm h-48"
+                placeholder="public class Product {
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}"
+          ></textarea>
+            </div>
+        </div>
+
+        <!-- Target (DTO) Code -->
+          <div class="space-y-2">
+            <label for="targetCode" class="block font-medium text-sm">Target (DTO) Code</label>
+            <div class="relative">
+          <textarea 
+            id="targetCode" 
+                class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-all font-mono text-sm h-48"
+                placeholder="public class ProductDto {
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}"
+          ></textarea>
+            </div>
+        </div>
+      </div>
+
+      <!-- Parse Classes Button -->
+        <div class="flex justify-center mt-6">
+        <button 
+          id="parseClassesBtn"
+            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+          Parse Classes
+        </button>
+      </div>
+
+      <!-- Mapping Configuration -->
+        <div id="mappingConfig" class="hidden mt-6 space-y-4 animate__animated animate__fadeIn">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Property Mappings</h3>
+            <button 
+              id="generateMappingBtn"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Generate Mapping Profile
+            </button>
+          </div>
+          
+          <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg">
+          <div id="mappingFields" class="space-y-2">
+            <!-- Mapping fields will be inserted here -->
+            </div>
+          </div>
+          </div>
+        </div>
+
+      <!-- Code Preview Card -->
+      <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg flex flex-col animate__animated animate__fadeInRight">
+        <div class="flex items-center justify-between p-6 border-b dark:border-slate-700">
+          <h2 class="text-xl font-semibold">Generated Code</h2>
+          <button 
+            id="copyCodeBtn" 
+            class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-all text-sm font-medium flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Copy Code
+          </button>
+        </div>
+
+        <pre id="codePreview" class="flex-1 p-6 bg-slate-50 dark:bg-slate-900 overflow-auto rounded-b-lg code-preview">
+          <code>// Generated code will appear here...</code>
+        </pre>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white dark:bg-slate-800 shadow-lg mt-6">
+    <div class="container mx-auto py-4 px-6 text-center text-sm text-slate-600 dark:text-slate-400">
+      &copy; 2025 Fabrice. Built with modern .NET 8 best practices.
+    </div>
+  </footer>
+
+  <!-- JavaScript Files -->
+  <script src="js/cqrsGenerator.js"></script>
+  <script src="js/serviceGenerator.js"></script>
+  <script src="js/simpleGenerator.js"></script>
+  <script src="js/autoMapper.js"></script>
+  <script src="js/dtoParser.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    // HTTP Method button handling
+    document.querySelectorAll('.method-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active class from all buttons
+        document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active', 'ring-2', 'ring-blue-500'));
+        // Add active class to clicked button
+        btn.classList.add('active', 'ring-2', 'ring-blue-500');
+        // Update hidden select
+        document.getElementById('httpMethodSelect').value = btn.dataset.method;
+      });
+    });
+
+    // Animate new fields when added
+    const originalAppendChild = Element.prototype.appendChild;
+    Element.prototype.appendChild = function() {
+      const child = originalAppendChild.apply(this, arguments);
+      if (this.id === 'dtoFieldsContainer' && child.classList.contains('flex')) {
+        child.classList.add('slide-in');
+      }
+      return child;
+    };
+  </script>
+</body>
+</html>
