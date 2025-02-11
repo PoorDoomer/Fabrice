@@ -1,4 +1,5 @@
 # Fabrice - Modern .NET 8 CRUD Generator
+![Fabrice](nge.jpg)
 
 Fabrice is a powerful, intuitive web application that generates clean and maintainable CRUD operations for .NET 8 applications. Built with modern best practices in mind, it supports multiple architectural patterns and provides a seamless development experience.
 
